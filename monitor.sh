@@ -1,13 +1,28 @@
 #!/bin/bash
 
 # INSERT ABSOLUTE PATH OF OHS INSTANCE LOCATION
-OHS_DIR=/proxy/owt/proxy/12.2.1.4/lab/lab_01
+OHS_DIR=/bcaproxy/owt/proxy/12.2.1.4/lab/lab_01
+#OHS_DIR=/bcaproxy/wls/domains/12.2.1/ohs_osb_dev
 
 # CONCAT PATH TO CONFIG FILE
 INS_DIR="${OHS_DIR}"/config/fmwconfig/components/OHS/instances/
 
 # LIST ALL COMPONENTS
 comps=`ls "${INS_DIR}"`
+
+# FUNCTION GET HTTP RESPONSE CODE
+getRes () {
+    response=`curl --write-out '%{http_code}' -sL --output /dev/null http://$1`
+
+    if  [ $response -eq 200 ]; then
+        state=`echo RUNNING`
+    elif [ $response -eq 000 ]; then
+        state=`echo FAILED`
+    else
+        state=`echo "Unidentified HTTP Response: " $response`
+    fi
+
+}
 
 # LOOPING IN EVERY COMPONENT
 for comp in $comps
@@ -21,20 +36,13 @@ do
             grep -v '#' | \
             awk '{print $2}'`
 
-    target=`grep -i 'WebLogicCluster' "${OHS_DIR}"/config/fmwconfig/components/OHS/"${comp}"/mod_wl_
-ohs.conf | \
+    target=`grep -i 'WebLogicCluster' "${OHS_DIR}"/config/fmwconfig/components/OHS/"${comp}"/mod_wl_ohs.c
+onf | \
             grep -v '#' | \
             awk '{print $2}' | \
             sed "s/,/ /g"`
 
-    curl -q http://$ip_ohs &> /dev/null
-
-    retVal=$?
-    if  [ $retVal -eq 0 ]
-        then state=`echo RUNNING`
-    else
-        state=`echo FAILED`
-    fi
+    getRes $ip_ohs
 
     echo "Instance : " $comp
     echo "State    : " $state
@@ -44,20 +52,10 @@ ohs.conf | \
 
     for tar in $target
     do
-        curl -q http://$tar &> /dev/null
-        retVal=$?
-
-            if  [ $retVal -eq 0 ]
-                then stat=`echo OK`
-            else
-                stat=`echo FAILED`
-            fi
-
-        echo "      - " $tar  $stat
+        getRes $tar
+        echo "      - " $tar  $state
     done
 
     echo
 
 done
-
-
