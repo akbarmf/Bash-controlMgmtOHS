@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # INSERT ABSOLUTE PATH OF OHS INSTANCE LOCATION
-OHS_DIR=/bcaproxy/owt/proxy/12.2.1.4/lab/lab_01
-#OHS_DIR=/bcaproxy/wls/domains/12.2.1/ohs_osb_dev
+OHS_DIR=/oracle/owt/proxy/12.2.1.4/lab/lab_01
+#OHS_DIR=/oracle/wls/domains/12.2.1/ohs_osb_dev
 
 # CONCAT PATH TO CONFIG FILE
 INS_DIR="${OHS_DIR}"/config/fmwconfig/components/OHS/instances/
